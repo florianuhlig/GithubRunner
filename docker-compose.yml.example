@@ -1,0 +1,16 @@
+services:
+  github-runner:
+    build: .
+    container_name: github-runner
+    environment:
+      RUNNER_TOKEN: "YourToken"
+      OWNER: "Your GitHub name"
+      REPO: "Your Repository name"
+    restart: unless-stopped
+    networks:
+      - net
+
+networks:
+  net:
+    name: docker_public
+    external: true
