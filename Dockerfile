@@ -1,44 +1,40 @@
-FROM alpine:3.19 AS builder
+FROM debian:bookworm-slim AS builder
 
-RUN apk update && apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    tar \
-    gzip \
-    bash \
-    ca-certificates
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG RUNNER_VERSION=2.310.2
 WORKDIR /tmp
 
 # Download runner file
 RUN curl -o actions-runner.tar.gz -L \
-    "https://github.com/actions/runner/releases/download/v2.330.0/actions-runner-linux-x64-2.330.0.tar.gz"
+    "https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz"
 
-# Create destination directory
-RUN mkdir -p /tmp/actions-runner
-
-# Extract withput --strip-components (could make problems)
-RUN tar xzf actions-runner.tar.gz -C /tmp/actions-runner
+# Create destination directory and extract
+RUN mkdir -p /tmp/actions-runner && \
+    tar xzf actions-runner.tar.gz -C /tmp/actions-runner
 
 # Runtime Stage
-FROM alpine:3.19
+FROM debian:bookworm-slim
 
-RUN apk update && apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     jq \
     git \
-    bash \
     sudo \
     ca-certificates \
-    && rm -rf /var/cache/apk/*
+    libicu72 \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN adduser -D -s /bin/bash runneruser && \
+RUN useradd -m -s /bin/bash runneruser && \
     echo "runneruser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir -p /actions-runner
 WORKDIR /actions-runner
 
-# Copy extacted files
+# Copy extracted files
 COPY --from=builder /tmp/actions-runner ./
 
 COPY entrypoint.sh /entrypoint.sh
