@@ -1,4 +1,3 @@
-# Bessere Alternative: Direkter Download
 FROM alpine:3.19 AS builder
 
 RUN apk update && apk add --no-cache \
@@ -11,14 +10,14 @@ RUN apk update && apk add --no-cache \
 ARG RUNNER_VERSION=2.310.2
 WORKDIR /tmp
 
-# Lade GitHub Actions Runner direkt herunter
+# Download runner file
 RUN curl -o actions-runner.tar.gz -L \
     "https://github.com/actions/runner/releases/download/v2.330.0/actions-runner-linux-x64-2.330.0.tar.gz"
 
-# Erstelle Zielverzeichnis
+# Create destination directory
 RUN mkdir -p /tmp/actions-runner
 
-# Extrahiere direkt ohne --strip-components (oft problematisch)
+# Extract withput --strip-components (could make problems)
 RUN tar xzf actions-runner.tar.gz -C /tmp/actions-runner
 
 # Runtime Stage
@@ -39,7 +38,7 @@ RUN adduser -D -s /bin/bash runneruser && \
 RUN mkdir -p /actions-runner
 WORKDIR /actions-runner
 
-# Kopiere extrahierte Dateien
+# Copy extacted files
 COPY --from=builder /tmp/actions-runner ./
 
 COPY entrypoint.sh /entrypoint.sh
