@@ -79,3 +79,5 @@ docker run -d \
 The image uses a two-stage build process:
 1. **Builder stage**: Downloads and extracts the GitHub Actions runner
 2. **Runtime stage**: Minimal Alpine image with only necessary dependencies
+
+ 
